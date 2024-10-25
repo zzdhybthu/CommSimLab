@@ -1,0 +1,19 @@
+# ssd files
+._*
+
+# macOS files
+.DS_Store
+
+# compiled source
+*.zip
+*.tar*
+*.gz
+*.7z
+*.rar
+
+# verilog simulation folder
+*.sim/
+
+# other 
+docs/
+project/
