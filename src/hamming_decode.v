@@ -1,5 +1,5 @@
 // 用verilog语言写一个(7,4)汉明码的解码器，输入为7位数据，输出为4位解码后的数据，能纠一位错。
-module hamming_dncode (
+module hamming_decode (
     input wire [6:0] data_i,
     output wire [3:0] data_o
 );
