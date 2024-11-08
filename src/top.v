@@ -33,7 +33,7 @@ module top(
     );
 
     reg inter_en;
-    reg inter_eno;
+    wire inter_eno;
     interleaver interleaver_0 (
         .clk(clk),
         .rst(rst),
@@ -60,6 +60,9 @@ module top(
         .q_out(guassian_q)
     );
 
+//    assign guassian_i = quantized_i;
+//    assign guassian_q = quantized_q;
+
     qpsk_demodulator qpsk_demodulator_0 (
         .clk(clk),
         .rst(rst),
@@ -68,7 +71,8 @@ module top(
         .data_o(qpsk_out)
     );
 
-    reg deinter_en, deinter_eno;
+    reg deinter_en;
+    wire deinter_eno;
     deinterleaver deinterleaver_0 (
         .clk(clk),
         .rst(rst),
@@ -102,54 +106,83 @@ module top(
             inter_en <= 1;
             deinter_en <= 0;
             qp_cnt <= 0;
-        end else begin
-            if (inter_eno) begin
-                inter_en <= 0;
-                qp_cnt <= 1;
-            end
-            if (qp_cnt >= 1 and qp_cnt <= 16) begin
-                if (qp_cnt <= 14) begin
-                    case (qp_cnt)
-                        1: qpsk_in <= inter_res[1:0];
-                        2: qpsk_in <= inter_res[3:2];
-                        3: qpsk_in <= inter_res[5:4];
-                        4: qpsk_in <= inter_res[7:6];
-                        5: qpsk_in <= inter_res[9:8];
-                        6: qpsk_in <= inter_res[11:10];
-                        7: qpsk_in <= inter_res[13:12];
-                        8: qpsk_in <= inter_res[15:14];
-                        9: qpsk_in <= inter_res[17:16];
-                        10: qpsk_in <= inter_res[19:18];
-                        11: qpsk_in <= inter_res[21:20];
-                        12: qpsk_in <= inter_res[23:22];
-                        13: qpsk_in <= inter_res[25:24];
-                        14: qpsk_in <= inter_res[27:26];
-                    endcase
-                end
-                if (qp_cnt >= 3) begin
-                    case (qp_cnt)
-                        3: deinter_in[1:0] <= qpsk_out;
-                        4: deinter_in[3:2] <= qpsk_out;
-                        5: deinter_in[5:4] <= qpsk_out;
-                        6: deinter_in[7:6] <= qpsk_out;
-                        7: deinter_in[9:8] <= qpsk_out;
-                        8: deinter_in[11:10] <= qpsk_out;
-                        9: deinter_in[13:12] <= qpsk_out;
-                        10: deinter_in[15:14] <= qpsk_out;
-                        11: deinter_in[17:16] <= qpsk_out;
-                        12: deinter_in[19:18] <= qpsk_out;
-                        13: deinter_in[21:20] <= qpsk_out;
-                        14: deinter_in[23:22] <= qpsk_out;
-                        15: deinter_in[25:24] <= qpsk_out;
-                        16: deinter_in[27:26] <= qpsk_out;
-                    endcase
-                end
-                if (qp_cnt == 16) begin
-                    deinter_en <= 1;
-                end
-                qp_cnt <= qp_cnt + 1;
-            end
+        end else if (inter_eno && !qp_cnt) begin
+            inter_en <= 0;
+            qp_cnt <= 1;
         end
     end
-
+    
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            source <= 16'b0001_0100_0111_1100;
+            inter_en <= 1;
+            deinter_en <= 0;
+            qp_cnt <= 0;
+        end else if (qp_cnt >= 1 && qp_cnt <= 14) begin
+            case (qp_cnt)
+                1: qpsk_in <= inter_res[1:0];
+                2: qpsk_in <= inter_res[3:2];
+                3: qpsk_in <= inter_res[5:4];
+                4: qpsk_in <= inter_res[7:6];
+                5: qpsk_in <= inter_res[9:8];
+                6: qpsk_in <= inter_res[11:10];
+                7: qpsk_in <= inter_res[13:12];
+                8: qpsk_in <= inter_res[15:14];
+                9: qpsk_in <= inter_res[17:16];
+                10: qpsk_in <= inter_res[19:18];
+                11: qpsk_in <= inter_res[21:20];
+                12: qpsk_in <= inter_res[23:22];
+                13: qpsk_in <= inter_res[25:24];
+                14: qpsk_in <= inter_res[27:26];
+            endcase
+        end
+    end
+    
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            source <= 16'b0001_0100_0111_1100;
+            inter_en <= 1;
+            deinter_en <= 0;
+            qp_cnt <= 0;
+        end else if (qp_cnt >= 4 && qp_cnt <= 17) begin
+            case (qp_cnt)
+                4: deinter_in[1:0] <= qpsk_out;
+                5: deinter_in[3:2] <= qpsk_out;
+                6: deinter_in[5:4] <= qpsk_out;
+                7: deinter_in[7:6] <= qpsk_out;
+                8: deinter_in[9:8] <= qpsk_out;
+                9: deinter_in[11:10] <= qpsk_out;
+                10: deinter_in[13:12] <= qpsk_out;
+                11: deinter_in[15:14] <= qpsk_out;
+                12: deinter_in[17:16] <= qpsk_out;
+                13: deinter_in[19:18] <= qpsk_out;
+                14: deinter_in[21:20] <= qpsk_out;
+                15: deinter_in[23:22] <= qpsk_out;
+                16: deinter_in[25:24] <= qpsk_out;
+                17: deinter_in[27:26] <= qpsk_out;
+            endcase
+        end
+    end
+    
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            source <= 16'b0001_0100_0111_1100;
+            inter_en <= 1;
+            deinter_en <= 0;
+            qp_cnt <= 0;
+        end else if(qp_cnt == 17) begin
+            deinter_en <= 1;
+        end
+    end
+        
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            source <= 16'b0001_0100_0111_1100;
+            inter_en <= 1;
+            deinter_en <= 0;
+            qp_cnt <= 0;
+        end else if(qp_cnt >= 1 && qp_cnt <= 17) begin
+            qp_cnt <= qp_cnt + 1;
+        end
+    end
 endmodule
