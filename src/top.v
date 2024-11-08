@@ -34,6 +34,7 @@ module top(
 
     reg inter_en;
     wire inter_eno;
+    wire inter_eno;
     interleaver interleaver_0 (
         .clk(clk),
         .rst(rst),
@@ -71,6 +72,8 @@ module top(
         .data_o(qpsk_out)
     );
 
+    reg deinter_en;
+    wire deinter_eno;
     reg deinter_en;
     wire deinter_eno;
     deinterleaver deinterleaver_0 (
