@@ -33,7 +33,7 @@ module top(
     );
 
     reg inter_en;
-    reg inter_eno;
+    wire inter_eno;
     interleaver interleaver_0 (
         .clk(clk),
         .rst(rst),
@@ -68,7 +68,8 @@ module top(
         .data_o(qpsk_out)
     );
 
-    reg deinter_en, deinter_eno;
+    reg deinter_en;
+    wire deinter_eno;
     deinterleaver deinterleaver_0 (
         .clk(clk),
         .rst(rst),
@@ -107,7 +108,7 @@ module top(
                 inter_en <= 0;
                 qp_cnt <= 1;
             end
-            if (qp_cnt >= 1 and qp_cnt <= 16) begin
+            if (qp_cnt >= 1 && qp_cnt <= 16) begin
                 if (qp_cnt <= 14) begin
                     case (qp_cnt)
                         1: qpsk_in <= inter_res[1:0];
