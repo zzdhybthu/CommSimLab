@@ -1,8 +1,10 @@
 module top(
     input wire clk,
-    input wire rst
+    input wire rst,
+    output wire [15:0] hamming_dec
 );
-    reg [15:0] source;
+    wire [15:0] source;
+	 assign source = 16'b0001_0100_0111_1100;
     wire [27:0] hamming_enc;
     wire [27:0] inter_res;
     reg [1:0] qpsk_in;
@@ -13,7 +15,7 @@ module top(
     wire [1:0] qpsk_out;
     reg [27:0] deinter_in;
     wire [27:0] deinter_out;
-    wire [15:0] hamming_dec;
+    // wire [15:0] hamming_dec;
 
     hamming_encode hamming_encode_0 (
         .data_i(source[3:0]),
@@ -34,7 +36,6 @@ module top(
 
     reg inter_en;
     wire inter_eno;
-    wire inter_eno;
     interleaver interleaver_0 (
         .clk(clk),
         .rst(rst),
@@ -52,17 +53,17 @@ module top(
         .data_o_q(quantized_q)
     );
 
-    gaussian_noise_channel gaussian_noise_channel_0 (
-        .clk(clk),
-        .rst(rst),
-        .i_in(quantized_i),
-        .q_in(quantized_q),
-        .i_out(guassian_i),
-        .q_out(guassian_q)
-    );
+    // gaussian_noise_channel gaussian_noise_channel_0 (
+    //     .clk(clk),
+    //     .rst(rst),
+    //     .i_in(quantized_i),
+    //     .q_in(quantized_q),
+    //     .i_out(guassian_i),
+    //     .q_out(guassian_q)
+    // );
 
-//    assign guassian_i = quantized_i;
-//    assign guassian_q = quantized_q;
+    assign guassian_i = quantized_i;
+    assign guassian_q = quantized_q;
 
     qpsk_demodulator qpsk_demodulator_0 (
         .clk(clk),
@@ -72,8 +73,6 @@ module top(
         .data_o(qpsk_out)
     );
 
-    reg deinter_en;
-    wire deinter_eno;
     reg deinter_en;
     wire deinter_eno;
     deinterleaver deinterleaver_0 (
@@ -105,22 +104,18 @@ module top(
     reg [4:0] qp_cnt;
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            source <= 16'b0001_0100_0111_1100;
             inter_en <= 1;
-            deinter_en <= 0;
-            qp_cnt <= 0;
+				qp_cnt <= 0;
         end else if (inter_eno && !qp_cnt) begin
             inter_en <= 0;
             qp_cnt <= 1;
+        end else if(qp_cnt >= 1 && qp_cnt <= 17) begin
+            qp_cnt <= qp_cnt + 1;
         end
     end
     
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            source <= 16'b0001_0100_0111_1100;
-            inter_en <= 1;
-            deinter_en <= 0;
-            qp_cnt <= 0;
         end else if (qp_cnt >= 1 && qp_cnt <= 14) begin
             case (qp_cnt)
                 1: qpsk_in <= inter_res[1:0];
@@ -143,10 +138,6 @@ module top(
     
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            source <= 16'b0001_0100_0111_1100;
-            inter_en <= 1;
-            deinter_en <= 0;
-            qp_cnt <= 0;
         end else if (qp_cnt >= 4 && qp_cnt <= 17) begin
             case (qp_cnt)
                 4: deinter_in[1:0] <= qpsk_out;
@@ -169,23 +160,9 @@ module top(
     
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            source <= 16'b0001_0100_0111_1100;
-            inter_en <= 1;
-            deinter_en <= 0;
-            qp_cnt <= 0;
+		      deinter_en <= 0;
         end else if(qp_cnt == 17) begin
             deinter_en <= 1;
-        end
-    end
-        
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            source <= 16'b0001_0100_0111_1100;
-            inter_en <= 1;
-            deinter_en <= 0;
-            qp_cnt <= 0;
-        end else if(qp_cnt >= 1 && qp_cnt <= 17) begin
-            qp_cnt <= qp_cnt + 1;
         end
     end
 endmodule
