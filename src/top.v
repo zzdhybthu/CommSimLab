@@ -61,7 +61,10 @@ module top(
         .eno(inter_eno),
         .data_o(inter_res)
     );
-
+    
+    wire [27:0] inter_res_error;
+    assign inter_res_error = {!inter_res[27],!inter_res[26],!inter_res[25],!inter_res[24],inter_res[23:0]};
+    
     qpsk_modulator qpsk_modulator_0 (
         .clk(clk),
         .rst(rst),
@@ -136,20 +139,19 @@ module top(
         if (~rst) begin
         end else if (qp_cnt >= 1 && qp_cnt <= 14) begin
             case (qp_cnt)
-                1: qpsk_in <= inter_res[1:0];
-                2: qpsk_in <= inter_res[3:2];
-                3: qpsk_in <= inter_res[5:4];
-                4: qpsk_in <= inter_res[7:6];
-                5: qpsk_in <= inter_res[9:8];
-                6: qpsk_in <= inter_res[11:10];
-                7: qpsk_in <= inter_res[13:12];
-                8: qpsk_in <= inter_res[15:14];
-                9: qpsk_in <= inter_res[17:16];
-                10: qpsk_in <= inter_res[19:18];
-                11: qpsk_in <= inter_res[21:20];
-                12: qpsk_in <= inter_res[23:22];
-                13: qpsk_in <= inter_res[25:24];
-                14: qpsk_in <= inter_res[27:26];
+                1: qpsk_in <= inter_res_error[1:0];
+                2: qpsk_in <= inter_res_error[3:2];
+                3: qpsk_in <= inter_res_error[5:4];
+                4: qpsk_in <= inter_res_error[7:6];
+                5: qpsk_in <= inter_res_error[9:8];
+                6: qpsk_in <= inter_res_error[11:10];
+                7: qpsk_in <= inter_res_error[13:12];
+                8: qpsk_in <= inter_res_error[15:14];
+                9: qpsk_in <= inter_res_error[17:16];
+                10: qpsk_in <= inter_res_error[19:18];
+                11: qpsk_in <= inter_res_error[21:20];
+                12: qpsk_in <= inter_res_error[23:22];
+                13: qpsk_in <= inter_res_error[25:24];
             endcase
         end
     end
