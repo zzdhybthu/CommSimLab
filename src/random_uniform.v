@@ -9,8 +9,8 @@ module random_uniform # (
 );
     reg [15:0] lfsr_state;
 
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
+    always @(posedge clk or negedge rst) begin
+        if (~rst) begin
             lfsr_state <= SEED;
         end else begin
             if (SEED[0] == 1) begin

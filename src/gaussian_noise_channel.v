@@ -38,8 +38,8 @@ module gaussian_noise_channel # (
     // // Optional: hardcode
     // reg [15:0] addr1;
     // reg [15:0] addr2;
-    // always @(posedge clk or posedge rst) begin
-    //     if (rst) begin
+    // always @(posedge clk or negedge rst) begin
+    //     if (~rst) begin
     //         addr1 <= 0;
     //         addr2 <= 512;
     //     end else begin

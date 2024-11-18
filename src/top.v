@@ -102,8 +102,8 @@ module top(
     );
 
     reg [4:0] qp_cnt;
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
+    always @(posedge clk or negedge rst) begin
+        if (~rst) begin
             inter_en <= 1;
 				qp_cnt <= 0;
         end else if (inter_eno && !qp_cnt) begin
@@ -114,8 +114,8 @@ module top(
         end
     end
     
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
+    always @(posedge clk or negedge rst) begin
+        if (~rst) begin
         end else if (qp_cnt >= 1 && qp_cnt <= 14) begin
             case (qp_cnt)
                 1: qpsk_in <= inter_res[1:0];
@@ -136,8 +136,8 @@ module top(
         end
     end
     
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
+    always @(posedge clk or negedge rst) begin
+        if (~rst) begin
         end else if (qp_cnt >= 4 && qp_cnt <= 17) begin
             case (qp_cnt)
                 4: deinter_in[1:0] <= qpsk_out;
@@ -158,8 +158,8 @@ module top(
         end
     end
     
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
+    always @(posedge clk or negedge rst) begin
+        if (~rst) begin
 		      deinter_en <= 0;
         end else if(qp_cnt == 17) begin
             deinter_en <= 1;

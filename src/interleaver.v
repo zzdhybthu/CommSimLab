@@ -9,8 +9,8 @@ module interleaver # (
     output reg eno,
     output reg [n*symbol_num-1:0] data_o
 );
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
+    always @(posedge clk or negedge rst) begin
+        if (~rst) begin
             data_o <= 0;
             eno <= 0;
         end
