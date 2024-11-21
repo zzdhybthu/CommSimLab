@@ -29,7 +29,7 @@ module top(
 
     wire clk_fast;
     clk_gen #(.CNT(1)) clk_gen_0 (
-        .clk(clk_fast),
+        .clk(clk_origin),
         .reset(rst),
         .clk_1K(clk_fast)
     );
@@ -180,7 +180,7 @@ module top(
     
     always @(posedge clk or negedge rst) begin
         if (~rst) begin
-		      deinter_en <= 0;
+		    deinter_en <= 0;
         end else if(qp_cnt == 17) begin
             deinter_en <= 1;
         end
