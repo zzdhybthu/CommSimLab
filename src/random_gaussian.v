@@ -16,6 +16,6 @@ module random_gaussian # (
         .gaussian_normal_o(gaussian_normal_o)
     );
 
-    assign gaussian_o = gaussian_normal_o * STD + MEAN;
+    assign gaussian_o = ( gaussian_normal_o * 7 >> 4) + MEAN;
 
 endmodule

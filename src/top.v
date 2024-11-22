@@ -21,14 +21,14 @@ module top(
     // wire [15:0] hamming_dec;
 
     wire clk;
-    clk_gen #(.CNT(54)) clk_gen_1 (
+    clk_gen #(.CNT(5400)) clk_gen_1 (
         .clk(clk_origin),
         .reset(rst),
         .clk_1K(clk)
     );
 
     wire clk_fast;
-    clk_gen #(.CNT(1)) clk_gen_0 (
+    clk_gen #(.CNT(100)) clk_gen_0 (
         .clk(clk_origin),
         .reset(rst),
         .clk_1K(clk_fast)
@@ -73,17 +73,17 @@ module top(
         .data_o_q(quantized_q)
     );
 
-    // gaussian_noise_channel gaussian_noise_channel_0 (
-    //     .clk(clk),
-    //     .rst(rst),
-    //     .i_in(quantized_i),
-    //     .q_in(quantized_q),
-    //     .i_out(guassian_i),
-    //     .q_out(guassian_q)
-    // );
+    gaussian_noise_channel gaussian_noise_channel_0 (
+        .clk(clk),
+        .rst(rst),
+        .i_in(quantized_i),
+        .q_in(quantized_q),
+        .i_out(guassian_i),
+        .q_out(guassian_q)
+    );
 
-    assign guassian_i = quantized_i;
-    assign guassian_q = quantized_q;
+    //assign guassian_i = quantized_i;
+    //assign guassian_q = quantized_q;
 
     qpsk_demodulator qpsk_demodulator_0 (
         .clk(clk),
