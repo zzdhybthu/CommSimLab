@@ -90,122 +90,13 @@
     ABSTRACT
 \end{abstract}
 
-\section{实验设计}
+\include{design}
 
-本实验系统由四个主要模块组成：Hamming 编解码、交织与解交织、QPSK 调制解调以及加性高斯白噪声（AWGN）信道。这些模块协同工作，模拟实际通信系统中的信号处理与传输过程。
+\include{detail}
 
-\subsection{Hamming 编解码}
+\include{simulation}
 
-\subsection{交织与解交织}
-
-\subsection{QPSK 调制解调}
-
-\subsection{AWGN 信道模型}
-
-AWGN（Additive White Gaussian Noise，加性白噪声）信道模型广泛应用于无线通信领域，用于模拟理想情况下的噪声影响。在此信道模型中，噪声是加性、均匀分布的，且具有高斯分布特性。在本实验中，AWGN 信道的模拟过程分为两个步骤：首先，通过 LFSR（线性反馈移位寄存器）生成伪随机数序列；然后，利用 Box-Muller 变换将这些伪随机数转换为服从高斯分布的随机数，最终将这些噪声加到信号中，模拟实际通信中的噪声干扰。
-
-\subsubsection{LFSR}
-
-为了产生 Gaussian 白噪声，首先需要生成均匀分布的伪随机数序列。本实验中，我们采用线性反馈移位寄存器（LFSR），通过移位寄存器和特定的反馈函数来生成这些随机数。
-
-图 \ref{fig:lfsr_model} 展示了一个 16 位 Fibonacci LFSR。其采用的特征多项式为 $X^{16} + X^{14} + X^{13} + X^{11} + 1$。该多项式确保了生成的随机序列的周期最大（65535，不包括全零状态），以有效地模拟随机性。移位寄存器逐位输出随机序列的每一位，同时通过反馈机制决定下一个状态。这一过程不断重复，直到达到最大周期。例如，图中的状态为 0xACE1 (十六进制) ，下一个状态是 0x5670.
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=.6\textwidth]{static/lfsr_model.png}
-    \caption{一个 16-位 Fibonacci LFSR}
-    \label{fig:lfsr_model}
-\end{figure}
-
-\subsubsection{Box-Muller}
-
-Box-Muller 变换是一种用于从均匀分布的随机数生成高斯分布随机数的方法。在本实验中，我们首先生成两个均匀分布的随机数 $U_1, U_2 \sim U(0, 1)$，然后通过以下公式将其转换为符合标准正态分布的随机数：
-
-$$
-\begin{aligned}
-X = \sqrt{-2\ln U_1} \cos(2\pi U_2) \\
-Y = \sqrt{-2\ln U_1} \sin(2\pi U_2)
-\end{aligned}
-$$
-
-其中，$X$ 和 $Y$ 分别为符合标准正态分布的随机变量。
-
-
-\section{实验过程}
-
-\subsection{AWGN 信道}
-
-\subsubsection{LFSR 生成均匀分布随机数}
-
-在本实验中，为保证生成的两组随机数序列的独立性，LFSR 的伪随机数序列通过不同的特征多项式、不同的种子生成。具体地，选用不同的 SEED 值（即种子），并根据其最低有效位（LSB）选择特定的反馈多项式：
-
-\begin{itemize} 
-    \item SEED[0] = 1 时，特征多项式为 $X^{16} + X^{14} + X^{13} + X^{11} + 1$ 
-    \item SEED[0] = 0 时，特征多项式为 $X^{16} + X^{15} + X^{13} + X^{4} + 1$ 
-\end{itemize}
-
-Verilog 代码实现如下：
-
-\begin{codeblock}{verilog}
-reg [15:0] lfsr_state;
-
-always @(posedge clk or posedge rst) begin
-    if (rst) begin
-        lfsr_state <= SEED;
-    end else begin
-        if (SEED[0] == 1) begin
-            lfsr_state <= {lfsr_state[14:0], lfsr_state[15] ^ lfsr_state[13] ^ lfsr_state[12] ^ lfsr_state[10]};
-        end else begin
-            lfsr_state <= {lfsr_state[14:0], lfsr_state[15] ^ lfsr_state[14] ^ lfsr_state[12] ^ lfsr_state[3]};
-        end
-    end
-end
-\end{codeblock}
-
-在此过程中，生成的伪随机数序列被用于模拟 AWGN 信道中的噪声影响。为了确保生成的随机数适应特定范围的需求，采用如下代码进行范围调整：
-
-\begin{codeblock}{verilog}
-assign uniform_o = lfsr_state % (O_MAX - O_MIN + 1'b1) + O_MIN;
-\end{codeblock}
-
-该过程通过调整输出值的范围，确保生成的随机数序列符合信道噪声的要求。
-
-
-\subsubsection{Box-Muller 生成高斯分布随机数}
-
-为了提高系统的效率，我们采用查表法来计算 Box-Muller 变换中的 $\ln U_1$ 以及 $\cos(2 \pi U_2)$，以减少计算复杂度。具体来说，我们通过查表将 $U_1$ 和 $U_2$ 映射到预先计算好的值，从而实现快速变换。
-
-特别地，对于 $\cos(2 \pi U_2)$，我们利用对称性和奇偶性，仅对 $U_1 \in [0, 0.25]$ 的部分进行查表映射，从而降低了存储需求并提高了查表效率：
-
-\begin{codeblock}{verilog}
-    wire cos_sign;
-    assign cos_sign = (uniform_o_0 <= 256) ? 0 :
-                      (uniform_o_0 <= 768) ? 1 :
-                      0;
-    wire [15:0] cos_addr;
-    assign cos_addr = (uniform_o_0 <= 256) ? (uniform_o_0 - 1) :
-                      (uniform_o_0 <= 512) ? (512 - uniform_o_0) :
-                      (uniform_o_0 <= 768) ? (uniform_o_0 - 513) :
-                      (1024 - uniform_o_0);
-    wire signed [7:0] cos_lut_o;
-    cos_lut cos_lut_0 (
-        .addr(cos_addr),
-        .cos_out(cos_lut_o)
-    );
-
-    wire signed [7:0] cos_o;
-    assign cos_o = cos_sign ? -cos_lut_o : cos_lut_o;
-\end{codeblock}
-
-为了有效处理计算和存储，Box-Muller 变换的实现采用了定点数表示，通过算术左移和右移操作，在不溢出的情况下平衡了计算精度和速度。
-
-\section{仿真测试}
-
-\subsection{AWGN 信道}
-
-我们保存了仿真产生的高斯白噪声数值，并进行了正态分布假设检验
-
-\section{实验效果}
+\include{experiment}
 
 \section{实验心得}
 
