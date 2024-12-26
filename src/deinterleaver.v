@@ -9,8 +9,8 @@ module deinterleaver # (
     output reg r_eno,
     output reg [n*symbol_num-1:0] r_data_o
 );
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
+    always @(posedge clk or negedge rst) begin
+        if (~rst) begin
             r_data_o <= 0;
             r_eno <= 0;
         end

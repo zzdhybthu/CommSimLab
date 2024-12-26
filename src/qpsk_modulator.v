@@ -8,8 +8,8 @@ module qpsk_modulator (
 
     localparam signed [15:0] CONST_VAL = 16'b0101_1011;  // 1/sqrt(2)
 
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
+    always @(posedge clk or negedge rst) begin
+        if (~rst) begin
             data_o_i <= 16'b0;
             data_o_q <= 16'b0;
         end else begin

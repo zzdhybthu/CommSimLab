@@ -8,8 +8,8 @@ module qpsk_demodulator (
 
     localparam signed [15:0] THRESHOLD = 16'b0;
 
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
+    always @(posedge clk or negedge rst) begin
+        if (~rst) begin
             data_o <= 2'b00;
         end else begin
             if (data_i_i > THRESHOLD) begin
