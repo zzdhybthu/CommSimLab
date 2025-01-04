@@ -17,10 +17,10 @@ module test_IL();
 
     initial begin
         clk <= 1;
-        rst <= 1;
+        rst <= 0;
         en <= 0;
         #10 en <= 1;
-        rst <= 0;
+        rst <= 1;
     end
     always #5 clk = ~clk;
     
