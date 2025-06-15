@@ -4,11 +4,22 @@
 
 \subsection{Hamming 编解码}
 
+在通信系统中，通过在信源中添加冗余信息，可以使信道传输后的结果具有一定的检错与纠错能力。本系统中采用 (7,4) Hamming信道编码，即将 4 位信息bit转换为7位编码bit，经过信道传输后纠错并转换回4位信息bit。具体原理表述如下：
 
+设 $\bm{m}$ 为 $k$ 位信息bit矢量，定义生成矩阵 $G_{k\times n}=[I_{k\times k}; P_{k\times(n-k)}]$ 为单位矩阵 $I$ 与奇偶校验阵 $P$ 的组合，编码后的结果为 $\bm{x}=\bm{m}G=[\bm{m};\bm{m}P]$。记 $H^T=\begin{bmatrix}P\\I\end{bmatrix}$ 为校验矩阵，由于 $GH^T=\begin{bmatrix}I;P\end{bmatrix}\begin{bmatrix}P\\I\end{bmatrix}=P+P=0$，故合法码字一定满足 $\bm{x}H^T=0$。由于Hamming码的最小码距为3，故最多纠一位错，设通过信道后的bit串为 $\bm{y}=\bm{x}+\bm{e}$，其中 $\bm{e}$ 为长度为 $n$ 且最多只有一位为1的矢量，则校正子 $\bm{s}=\bm{y}H^T=\bm{x}H^T+\bm{e}H^T=\bm{e}H^T$ 为 $H^T$ 矩阵中的某一行，将校正子与 $H^T$ 比较即可得出错误bit位置，从而完成纠错。
 
 \subsection{交织与解交织}
 
+在通信系统中，由于无线信道的深衰落等原因，有可能使得系统中存在不可抗拒的连续突发错误，这使得一组码字中可能出现多于 1 位的错误，则 Hamming 码的纠错能力大大下降。为此，可在编码后引入一个交织器，典型的交织器让信息序列按行写入，按列读出，使得原本相邻的码元在时间上的距离最大化。如图 \ref{fig:interleave_model} 所示，交织矩阵的列数一般不小于分组码长，交织矩阵的行数不小于突发错最大长度。一个交织块的长度为交织矩阵的列数乘行数，略小于交织延时和解交织延时。交织块总长度应为整数个编码块长度，以避免同一个编码块分到前后两个交织块引起过大延时。
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.8\textwidth]{static/interleave_model.pdf}
+    \caption{交织与解交织过程}
+    \label{fig:interleave_model}
+\end{figure}
+
+在本次实验中，我们取交织矩阵的列数等于 Hamming 码长 $n=7$，交织矩阵的行数取 $m=4$，交织块的长度 $mn=28$. 
 
 \subsection{QPSK 调制解调}
 

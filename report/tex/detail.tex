@@ -2,11 +2,126 @@
 
 \subsection{Hamming 编解码}
 
+编码器与解码器均采用组合逻辑编写，其中 
+$$\mbox{生成矩阵}~\bm{G} = \begin{bmatrix}1 & 0 & 0 & 0 & 1 & 1 & 1\\ 0 & 1 & 0 & 0 & 1 & 0 & 1\\ 0 & 0 & 1 & 0 &1 & 1 & 0\\ 0 & 0 & 0 & 1 & 0 & 1 & 1\end{bmatrix},~ \mbox{校验矩阵}~\bm{H}^T=\begin{bmatrix}1 & 1 & 1\\ 1 & 0 & 1\\ 1 & 1 & 0\\ 0 & 1 & 1\\ 1 & 0 & 0\\ 0 & 1 & 0\\ 0 & 0 & 1\end{bmatrix}$$
+
+于是编码器的Verilog关键代码为：
+
+\begin{codeblock}{verilog}
+assign data_o[0] = data_i[0];
+assign data_o[1] = data_i[1];
+assign data_o[2] = data_i[2];
+assign data_o[3] = data_i[3];
+assign data_o[4] = data_i[0] ^ data_i[1] ^ data_i[2];
+assign data_o[5] = data_i[0] ^ data_i[2] ^ data_i[3];
+assign data_o[6] = data_i[0] ^ data_i[1] ^ data_i[3];
+\end{codeblock}
+
+解码器的Verilog关键代码为：
+\begin{codeblock}{verilog}
+// 先计算校正子
+wire [2:0] parity;
+assign parity[0] = data_i[4] ^ data_i[0] ^ data_i[1] ^ data_i[2];
+assign parity[1] = data_i[5] ^ data_i[0] ^ data_i[2] ^ data_i[3];
+assign parity[2] = data_i[6] ^ data_i[0] ^ data_i[1] ^ data_i[3];
+// 比较校正子和校验矩阵
+assign data_o = (parity==3'b111) ? data_i[3:0]^4'b0001 : 
+                (parity==3'b101) ? data_i[3:0]^4'b0010 :
+                (parity==3'b011) ? data_i[3:0]^4'b0100 :
+                (parity==3'b110) ? data_i[3:0]^4'b1000 :
+                data_i[3:0];
+\end{codeblock}
 
 
 \subsection{交织与解交织}
 
+交织器：当检测到 Hamming 码编码器成功完成 $m=4$ 次编码时，将 $mn=28$ 位编码器输出直接映射为 $28$ 位交织器输出。
 
+Verilog 关键代码如下，通过采用直接映射的方式，有效提高了系统的效率。
+
+\begin{codeblock}{verilog}
+always @(posedge clk or negedge rst) begin
+    if (~rst) begin
+        data_o <= 0;
+        eno <= 0;
+    end
+    else if (en) begin
+        data_o[0] <= data_i[0];
+        data_o[1] <= data_i[7];
+        data_o[2] <= data_i[14];
+        data_o[3] <= data_i[21];
+        data_o[4] <= data_i[1];
+        data_o[5] <= data_i[8];
+        data_o[6] <= data_i[15];
+        data_o[7] <= data_i[22];
+        data_o[8] <= data_i[2];
+        data_o[9] <= data_i[9];
+        data_o[10] <= data_i[16];
+        data_o[11] <= data_i[23];
+        data_o[12] <= data_i[3];
+        data_o[13] <= data_i[10];
+        data_o[14] <= data_i[17];
+        data_o[15] <= data_i[24];
+        data_o[16] <= data_i[4];
+        data_o[17] <= data_i[11];
+        data_o[18] <= data_i[18];
+        data_o[19] <= data_i[25];
+        data_o[20] <= data_i[5];
+        data_o[21] <= data_i[12];
+        data_o[22] <= data_i[19];
+        data_o[23] <= data_i[26];
+        data_o[24] <= data_i[6];
+        data_o[25] <= data_i[13];
+        data_o[26] <= data_i[20];
+        data_o[27] <= data_i[27];
+        eno <= 1;
+    end
+end
+\end{codeblock}
+
+解交织器：当检测到 QPSK 解调器成功完成 $14$ 次解调时，将 $28$ 位解调器输出直接映射为 $28$ 位解交织器输出。
+
+Verilog 关键代码如下，与交织过程类似。
+
+\begin{codeblock}{verilog}
+always @(posedge clk or negedge rst) begin
+    if (~rst) begin
+        r_data_o <= 0;
+        r_eno <= 0;
+    end
+    else if (r_en) begin
+        r_data_o[0] <= r_data_i[0];
+        r_data_o[1] <= r_data_i[4];
+        r_data_o[2] <= r_data_i[8];
+        r_data_o[3] <= r_data_i[12];
+        r_data_o[4] <= r_data_i[16];
+        r_data_o[5] <= r_data_i[20];
+        r_data_o[6] <= r_data_i[24];
+        r_data_o[7] <= r_data_i[1];
+        r_data_o[8] <= r_data_i[5];
+        r_data_o[9] <= r_data_i[9];
+        r_data_o[10] <= r_data_i[13];
+        r_data_o[11] <= r_data_i[17];
+        r_data_o[12] <= r_data_i[21];
+        r_data_o[13] <= r_data_i[25];
+        r_data_o[14] <= r_data_i[2];
+        r_data_o[15] <= r_data_i[6];
+        r_data_o[16] <= r_data_i[10];
+        r_data_o[17] <= r_data_i[14];
+        r_data_o[18] <= r_data_i[18];
+        r_data_o[19] <= r_data_i[22];
+        r_data_o[20] <= r_data_i[26];
+        r_data_o[21] <= r_data_i[3];
+        r_data_o[22] <= r_data_i[7];
+        r_data_o[23] <= r_data_i[11];
+        r_data_o[24] <= r_data_i[15];
+        r_data_o[25] <= r_data_i[19];
+        r_data_o[26] <= r_data_i[23];
+        r_data_o[27] <= r_data_i[27];
+        r_eno <= 1;
+    end
+end
+\end{codeblock}
 
 \subsection{QPSK 调制解调}
 
@@ -15,7 +130,7 @@ QPSK 调制器：
 \begin{itemize} 
     \item QPSK 调制器根据输入的 2 比特数据，将其分别映射为 I 路和 Q 路的符号。
     \item 由于 QPSK 调制是基于正交载波的，调制器的输出信号对应于一个复数的实部和虚部，分别通过 I 路和 Q 路输出。
-    \item 具体实现中，我们通过将每个输入符号映射到 ±1/√2 乘以常数值来实现 QPSK 调制。常数值为 $1/\sqrt{2}$，其作用是对输出信号进行归一化处理，避免过强的信号造成干扰。
+    \item 具体实现中，我们通过将每个输入符号映射到 $\pm 1/\sqrt{2}$ 乘以常数值来实现 QPSK 调制。常数值为 $1/\sqrt{2}$，其作用是对输出信号进行归一化处理，避免过强的信号造成干扰。
 \end{itemize}
 
 Verilog 关键代码如下：

@@ -16,6 +16,7 @@
 \usepackage{booktabs, array}  % Tables
 \usepackage{multirow}  % Multirow
 \usepackage{amsmath}  % Math
+\usepackage{bm}
 
 \tcbuselibrary{skins}  % Colored boxes
 \tcbuselibrary{minted}  % Code blocks
@@ -71,24 +72,20 @@
     },
     minted language=#2,
     minted style=tango,
-    minted options={fontsize=\small,breaklines,autogobble,linenos,numbersep=3mm,escapeinside=\#\#},#1  % Use \# as escape character
+    minted options={fontsize=\small,breaklines,autogobble,linenos,numbersep=3mm,escapeinside=《},#1  % Use \# as escape character
 }
 
 
 \begin{document}
 
 \title{\textbf{通信原理实验报告}}
-\author{纳姆露丝}
+\author{陈子熠 \quad 游笑权 \quad 向明义}
 \date{\today}
 \maketitle
 
 \tableofcontents
 
 \newpage
-
-\begin{abstract}
-    ABSTRACT
-\end{abstract}
 
 \include{design}
 
@@ -98,13 +95,14 @@
 
 \include{experiment}
 
-\section{实验心得}
-
 \section{成员分工}
 
-Hamming 编码、解码：向明义 \\
-交织、解交织：游笑权 \\
-QPSK 调制解调、AWGN 信道：陈子熠
+\begin{itemize}
+    \item Hamming 编码、解码：向明义 \ 2021012760
+    \item 交织、解交织：游笑权 \ 2021012763
+    \item QPSK 调制解调、AWGN 信道：陈子熠 \ 2022010503
+    \item 联调：全体成员
+\end{itemize}
 
 % % TEXT
 % PLAIN
