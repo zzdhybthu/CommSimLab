@@ -14,18 +14,8 @@ Grade: A
 |-- README.md
 |-- log\
 |-- report
-|   |-- design.tex
-|   |-- detail.tex
-|   |-- experiment.tex
-|   |-- main.tex
-|   |-- simulation.tex
-|   `-- static
-|       |-- gaussian_acf_100.png
-|       |-- gaussian_acf_40.png
-|       |-- gaussian_fit.png
-|       |-- gaussian_qq.png
-|       |-- lfsr_model.png
-|       `-- qpsk_model.png
+|   |-- tex\
+|   `-- report.pdf
 |-- script\
 |-- src\
 `-- test\
